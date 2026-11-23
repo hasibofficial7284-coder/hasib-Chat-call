@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HASIB OFFICIAL</title>
+<style>
+:root{--green:#087f5b;--dark:#102b46;--bg:#f3f6f8;--muted:#718096}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:Arial,"Noto Sans Bengali",sans-serif;color:#172b3a}
+header{background:var(--dark);color:white;padding:17px 18px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:800;font-size:20px;letter-spacing:.4px}.tag{font-size:11px;color:#c8d9e8;margin-top:3px}
+.pill{border:1px solid #ffffff55;border-radius:20px;padding:7px 10px;font-size:12px}
+main{max-width:520px;margin:18px auto;padding:0 13px}
+.card{background:white;border-radius:18px;padding:18px;box-shadow:0 5px 22px #18364a0c;margin-bottom:14px}
+h2{font-size:19px;margin:0 0 6px}p{color:var(--muted);font-size:13px;line-height:1.55}
+input,button{font:inherit}input{width:100%;padding:13px;border:1px solid #dce4e9;border-radius:11px;margin:7px 0;outline:none}
+button{border:0;border-radius:11px;padding:12px 15px;background:var(--green);color:white;font-weight:700;cursor:pointer}
+button.secondary{background:#e8f4ef;color:var(--green)}button.full{width:100%;margin-top:8px}
+.switch{display:flex;gap:8px;margin:12px 0}.switch button{flex:1}
+.hidden{display:none!important}.tabs{display:flex;gap:8px;overflow:auto;margin-bottom:12px}.tabs button{white-space:nowrap;background:#e6ecef;color:#425466}.tabs button.active{background:var(--green);color:white}
+.person{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #edf1f3;cursor:pointer}
+.avatar{width:43px;height:43px;border-radius:50%;background:#d8eee6;color:var(--green);display:grid;place-items:center;font-weight:800}
+.person strong{font-size:14px}.person small{display:block;color:var(--muted);margin-top:4px}
+.notice{background:#eaf6f1;border-radius:12px;padding:12px;color:#17664e;font-size:13px}
+footer{text-align:center;color:#91a0aa;font-size:11px;padding:16px}
+.chatbox{height:220px;overflow:auto;background:#f5f8f9;border-radius:12px;padding:10px;margin:10px 0}
+.bubble{background:white;border-radius:12px;padding:9px 11px;margin:7px 0;max-width:82%;font-size:13px}.mine{background:#d9f5e8;margin-left:auto}
+.row{display:flex;gap:7px}.row input{flex:1}.row button{margin:7px 0}
+#recaptcha-container{margin:8px 0}
+#authMsg{padding:10px 12px;border-radius:10px;background:#f1f5f7;font-size:13px}
+#authMsg.err{background:#fdecec;color:#b42318;font-weight:700}
+#authMsg.ok{background:#eaf6f1;color:#17664e;font-weight:700}
+button:disabled{opacity:.6}
+#chatView{position:fixed;inset:0;background:#e9efe9;display:flex;flex-direction:column;z-index:10}
+.cbar{background:var(--dark);color:#fff;padding:12px;display:flex;align-items:center;gap:10px}.cbar button{background:#ffffff22;padding:8px 12px}
+#msgs{flex:1;overflow:auto;padding:10px}.time{font-size:10px;color:#7b8a94;text-align:right;margin-top:3px}
+.cinput{display:flex;gap:7px;padding:8px;background:#fff}.cinput input{margin:0;flex:1}
+#appMsg{margin:8px 0;font-size:13px;color:#b42318;font-weight:700}.search{margin-bottom:6px}
+</style>
+</head>
+<body>
+<header><div><div class="brand">HASIB OFFICIAL</div><div class="tag">CONNECT • CHAT • CALL</div></div><span class="pill">BETA</span></header>
+<main>
+<section id="auth" class="card">
+<h2>স্বাগতম 👋</h2><p>HASIB OFFICIAL-এ অ্যাকাউন্ট তৈরি করুন অথবা লগইন করুন।</p>
+<div class="switch"><button id="emailTab" class="active" onclick="chooseMode('email')">Gmail / Email</button><button id="phoneTab" class="secondary" onclick="chooseMode('phone')">মোবাইল</button></div>
+<input id="identity" type="email" placeholder="Email address">
+<input id="password" type="password" placeholder="কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড">
+<div id="emailActions"><button class="full" onclick="emailAuth('create')">নতুন অ্যাকাউন্ট তৈরি</button><button class="secondary full" onclick="emailAuth('login')">লগইন</button></div>
+<div id="phoneActions" class="hidden"><button class="full" onclick="sendPhoneCode()">OTP পাঠান</button><input id="otp" class="hidden" placeholder="SMS-এ পাওয়া OTP লিখুন"><button id="verifyBtn" class="full hidden" onclick="verifyPhoneCode()">OTP যাচাই করুন</button><div id="recaptcha-container"></div></div>
+<p id="authMsg">Email/Phone Authentication চালু করতে Firebase Console → Authentication → Sign-in method থেকে Email/Password ও Phone Enable করুন।</p>
+</section>
+<section id="home" class="hidden">
+<div class="tabs"><button class="active" onclick="showTab('chats',this)">চ্যাট</button><button onclick="showTab('people',this)">লোকজন</button><button onclick="showTab('calls',this)">কল</button><button onclick="showTab('profile',this)">প্রোফাইল</button></div>
+<div id="appMsg"></div>
+<div id="chats" class="card"><h2>Messages</h2><div id="chatList"><p>এখনো কোনো চ্যাট নেই। "লোকজন" ট্যাব থেকে কাউকে বেছে মেসেজ করুন।</p></div></div>
+<div id="people" class="card hidden"><h2>সব ইউজার</h2><input id="search" class="search" placeholder="নাম বা Email খুঁজুন" oninput="renderPeople()"><div id="peopleList"></div></div>
+<div id="calls" class="card hidden"><h2>Calls</h2><p>Voice ও Video Call পরবর্তী ধাপে যুক্ত হবে।</p></div>
+<div id="profile" class="card hidden"><h2>আপনার প্রোফাইল</h2><p id="profileName"></p><input id="nameInput" placeholder="আপনার নাম"><button class="full" onclick="saveName()">নাম সেভ করুন</button><button class="secondary full" onclick="logout()">লগআউট</button></div>
+</section>
+</main><footer>HASIB OFFICIAL • Firebase Authentication Starter</footer>
+<div id="chatView" class="hidden"><div class="cbar"><button onclick="closeChat()">←</button><strong id="chatTitle"></strong></div><div id="msgs"></div><div class="cinput"><input id="msgInput" placeholder="মেসেজ লিখুন" onkeydown="if(event.key==='Enter')sendMsg()"><button onclick="sendMsg()">পাঠান</button></div></div>
+<div id="phone-recaptcha"></div>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA3oaBP8DUjas8xcS7SRm890kKeU5rWRxw",
+  authDomain: "hasib-official.firebaseapp.com",
+  projectId: "hasib-official",
+  storageBucket: "hasib-official.firebasestorage.app",
+  messagingSenderId: "214174731975",
+  appId: "1:214174731975:web:0ef5e80e8ec2b6fe21b8e2",
+  measurementId: "G-QPPWQ0HNET"
+};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
+let mode='email',confirmation=null,recaptcha=null;
+const msg=(t,type)=>{const el=document.getElementById('authMsg');el.textContent=t;el.className=type||'';};
+window.addEventListener('error',ev=>msg('ত্রুটি: '+ev.message,'err'));
+window.addEventListener('unhandledrejection',ev=>msg('ত্রুটি: '+((ev.reason&&(ev.reason.code||ev.reason.message))||ev.reason),'err'));
+if(!/^https?:$/.test(location.protocol)){setTimeout(()=>msg('⚠️ ফাইলটি ফোনের ফাইল হিসেবে (Telegram/ফাইল ম্যানেজার থেকে) খোলা হয়েছে। এভাবে Firebase Login কাজ করে না। Netlify বা Firebase Hosting-এর https লিংক থেকে খুলুন।','err'),300);}
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(()=>auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)).catch(()=>auth.setPersistence(firebase.auth.Auth.Persistence.NONE)).catch(()=>{});
+function chooseMode(m){mode=m;document.getElementById('emailTab').classList.toggle('active',m==='email');document.getElementById('emailTab').classList.toggle('secondary',m!=='email');document.getElementById('phoneTab').classList.toggle('active',m==='phone');document.getElementById('phoneTab').classList.toggle('secondary',m!=='phone');document.getElementById('identity').type=m==='email'?'email':'tel';document.getElementById('identity').placeholder=m==='email'?'Email address (যেমন name@gmail.com)':'দেশের কোডসহ নম্বর (যেমন +8801XXXXXXXXX)';document.getElementById('password').classList.toggle('hidden',m==='phone');document.getElementById('emailActions').classList.toggle('hidden',m!=='email');document.getElementById('phoneActions').classList.toggle('hidden',m!=='phone');msg(m==='phone'?'দেশের কোডসহ সঠিক ফোন নম্বর লিখুন। SMS OTP যাচাই হবে।':'Email/Password দিয়ে নতুন অ্যাকাউন্ট তৈরি বা লগইন করুন।');}
+async function emailAuth(action){
+const email=document.getElementById('identity').value.trim(),password=document.getElementById('password').value;
+if(!email||password.length<6){msg('সঠিক Email এবং কমপক্ষে ৬ অক্ষরের পাসওয়ার্ড দিন।','err');return;}
+const btns=document.querySelectorAll('#emailActions button');btns.forEach(b=>b.disabled=true);msg('অপেক্ষা করুন...');
+try{
+const cred=action==='create'?await auth.createUserWithEmailAndPassword(email,password):await auth.signInWithEmailAndPassword(email,password);
+msg('✅ Login সফল!','ok');enterApp(cred.user||auth.currentUser);
+}catch(e){msg(firebaseError(e),'err');}
+finally{btns.forEach(b=>b.disabled=false);}
+}
+async function sendPhoneCode(){const phone=document.getElementById('identity').value.trim();if(!/^\+[1-9]\d{7,14}$/.test(phone)){msg('ফোন নম্বর +8801XXXXXXXXX ফরম্যাটে লিখুন।');return;}try{if(!recaptcha)recaptcha=new firebase.auth.RecaptchaVerifier('recaptcha-container',{size:'normal'});confirmation=await auth.signInWithPhoneNumber(phone,recaptcha);document.getElementById('otp').classList.remove('hidden');document.getElementById('verifyBtn').classList.remove('hidden');msg('OTP পাঠানো হয়েছে। SMS থেকে কোড লিখুন।');}catch(e){msg(firebaseError(e));if(recaptcha){try{recaptcha.clear()}catch(_){}recaptcha=null;}}}
+async function verifyPhoneCode(){const code=document.getElementById('otp').value.trim();if(!confirmation||!code){msg('OTP লিখুন।');return;}try{const cred=await confirmation.confirm(code);enterApp(cred.user);}catch(e){msg(firebaseError(e));}}
+function enterApp(user){if(!user)return;document.getElementById('auth').classList.add('hidden');document.getElementById('home').classList.remove('hidden');document.getElementById('profileName').textContent=user.email||user.phoneNumber||user.uid;window.scrollTo(0,0);initUser(user).catch(appErr);}
+function logout(){stopAll();auth.signOut().then(()=>{document.getElementById('home').classList.add('hidden');document.getElementById('auth').classList.remove('hidden');});}
+function showTab(id,btn){['chats','people','calls','profile'].forEach(x=>document.getElementById(x).classList.add('hidden'));document.getElementById(id).classList.remove('hidden');document.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');}
+function firebaseError(e){const map={'auth/operation-not-allowed':'Firebase Console-এ এই Login পদ্ধতি Enable করুন।','auth/invalid-api-key':'Firebase API key ঠিক আছে কি না দেখুন।','auth/invalid-phone-number':'ফোন নম্বর দেশের কোডসহ লিখুন।','auth/unauthorized-domain':'Firebase Authentication → Settings → Authorized domains-এ আপনার অ্যাপের domain যোগ করুন।','auth/too-many-requests':'অনেকবার চেষ্টা হয়েছে। কিছুক্ষণ পরে আবার চেষ্টা করুন।','auth/network-request-failed':'ইন্টারনেট সংযোগ পরীক্ষা করুন।','auth/invalid-credential':'Email বা Password ভুল। (অ্যাকাউন্ট না থাকলে আগে "নতুন অ্যাকাউন্ট তৈরি" চাপুন।)','auth/wrong-password':'Password ভুল।','auth/user-not-found':'এই Email-এ অ্যাকাউন্ট নেই। আগে "নতুন অ্যাকাউন্ট তৈরি" চাপুন।','auth/email-already-in-use':'এই Email দিয়ে অ্যাকাউন্ট আগেই আছে। "লগইন" চাপুন।','auth/invalid-email':'Email ফরম্যাট ভুল।','auth/weak-password':'Password কমপক্ষে ৬ অক্ষরের দিন।','auth/user-disabled':'এই অ্যাকাউন্ট বন্ধ করা আছে।','auth/operation-not-supported-in-this-environment':'এই পরিবেশে (file:// বা WebView) Login চলে না। https লিংক থেকে খুলুন।','auth/web-storage-unsupported':'ব্রাউজার/WebView-এ Storage বন্ধ। APK-তে DOM Storage চালু করুন।','auth/internal-error':'Firebase internal error। Authorized domains ও API key restriction চেক করুন।'};return (map[e.code]||'Firebase error')+' ['+(e.code||'unknown')+']';}
+
+const db=firebase.firestore(),TS=()=>firebase.firestore.FieldValue.serverTimestamp();
+let me=null,users={},chats=[],cur=null,uU=null,uC=null,uM=null;
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cid=(a,b)=>[a,b].sort().join('_');
+const fmt=d=>d?d.toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'}):'';
+const nm=u=>u?(u.name||u.email||u.phone||'ইউজার'):'ইউজার';
+function appErr(e){const m=/permission/i.test(e.message||'')?'Firestore Rules/Database চালু করা হয়নি। Firebase Console → Firestore Database দেখুন।':(e.message||e);document.getElementById('appMsg').textContent='⚠️ '+m;}
+function stopAll(){[uU,uC,uM].forEach(f=>f&&f());uU=uC=uM=null;me=null;cur=null;users={};chats=[];}
+async function initUser(user){
+if(me&&me.uid===user.uid)return;stopAll();me=user;document.getElementById('appMsg').textContent='';
+const ref=db.collection('users').doc(user.uid),snap=await ref.get();
+const base={uid:user.uid,email:user.email||'',phone:user.phoneNumber||'',lastSeen:TS()};
+if(!snap.exists)base.name=(user.email||user.phoneNumber||'User').split('@')[0];
+await ref.set(base,{merge:true});
+document.getElementById('nameInput').value=(snap.exists?snap.data().name:base.name)||'';
+uU=db.collection('users').onSnapshot(s=>{users={};s.forEach(d=>users[d.id]=d.data());renderPeople();renderChats();},appErr);
+uC=db.collection('chats').where('members','array-contains',user.uid).onSnapshot(s=>{chats=s.docs.map(d=>d.data({serverTimestamps:'estimate'}));chats.sort((a,b)=>(b.lastAt?b.lastAt.toMillis():0)-(a.lastAt?a.lastAt.toMillis():0));renderChats();},appErr);
+}
+function renderPeople(){if(!me)return;const q=document.getElementById('search').value.toLowerCase();
+const list=Object.values(users).filter(u=>u.uid!==me.uid&&(nm(u)+(u.email||'')).toLowerCase().includes(q));
+document.getElementById('peopleList').innerHTML=list.length?list.map(u=>`<div class="person" onclick="openChat('${u.uid}')"><div class="avatar">${esc(nm(u)[0].toUpperCase())}</div><div><strong>${esc(nm(u))}</strong><small>${esc(u.email||u.phone||'')}</small></div></div>`).join(''):'<p>কোনো ইউজার পাওয়া যায়নি। বন্ধুকে একই লিংকে অ্যাকাউন্ট খুলতে বলুন।</p>';}
+function renderChats(){if(!me)return;const l=chats.filter(c=>c.lastMessage);
+document.getElementById('chatList').innerHTML=l.length?l.map(c=>{const o=c.members.find(x=>x!==me.uid),u=users[o];return `<div class="person" onclick="openChat('${o}')"><div class="avatar">${esc(nm(u)[0].toUpperCase())}</div><div style="flex:1"><strong>${esc(nm(u))}</strong><small>${c.lastFrom===me.uid?'আপনি: ':''}${esc(c.lastMessage)}</small></div><small>${fmt(c.lastAt&&c.lastAt.toDate())}</small></div>`}).join(''):'<p>এখনো কোনো চ্যাট নেই। "লোকজন" ট্যাব থেকে কাউকে বেছে মেসেজ করুন।</p>';}
+async function openChat(uid){try{
+cur={id:cid(me.uid,uid),other:uid};
+await db.collection('chats').doc(cur.id).set({members:[me.uid,uid]},{merge:true});
+document.getElementById('chatTitle').textContent=nm(users[uid]);document.getElementById('chatView').classList.remove('hidden');
+if(uM)uM();
+uM=db.collection('chats').doc(cur.id).collection('messages').orderBy('at').onSnapshot(s=>{const box=document.getElementById('msgs');
+box.innerHTML=s.docs.map(d=>{const m=d.data({serverTimestamps:'estimate'}),mine=m.from===me.uid;
+if(!mine&&!m.read)d.ref.update({read:true}).catch(()=>{});
+return `<div class="bubble ${mine?'mine':''}">${esc(m.text)}<div class="time">${fmt(m.at&&m.at.toDate())} ${mine?(m.read?'✓✓':'✓'):''}</div></div>`}).join('');box.scrollTop=box.scrollHeight;},appErr);
+}catch(e){appErr(e);}}
+function closeChat(){if(uM)uM();uM=null;cur=null;document.getElementById('chatView').classList.add('hidden');}
+async function sendMsg(){const inp=document.getElementById('msgInput'),text=inp.value.trim();if(!text||!cur)return;inp.value='';
+try{const ref=db.collection('chats').doc(cur.id);
+await ref.set({members:[me.uid,cur.other],lastMessage:text,lastAt:TS(),lastFrom:me.uid},{merge:true});
+await ref.collection('messages').add({from:me.uid,text,at:TS(),read:false});}catch(e){appErr(e);}}
+async function saveName(){const n=document.getElementById('nameInput').value.trim();if(!n||!me)return;try{await db.collection('users').doc(me.uid).set({name:n},{merge:true});document.getElementById('appMsg').style.color='#17664e';document.getElementById('appMsg').textContent='✅ নাম সেভ হয়েছে';}catch(e){appErr(e);}}
+auth.onAuthStateChanged(user=>{if(user)enterApp(user);});
+</script>
+</body></html>
